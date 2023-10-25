@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { Inter } from "next/font/google";
 import Head from "next/head";
+import Link from "next/link";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,7 +24,7 @@ export default function Home() {
         />
       </div>
       <div className='bg-gray-900 m-20 rounded-xl'>
-        <h1 className="text-4xl p-4">Connect</h1>
+        <Link href="/table/events"><h1 className="text-4xl p-4">Connect</h1></Link>
       </div>
     </main>
   );
