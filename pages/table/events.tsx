@@ -67,7 +67,7 @@ const fetchTrades = async (
   const newEvents = await Promise.all(
     rawEvents.map(async (event: any) => {
       const { returnValues, blockNumber, transactionHash } = event;
-
+    
       const blockDetails = await web3.eth.getBlock(blockNumber);
       if (blockDetails === undefined || !blockDetails.timestamp) {
         console.warn("blockDetails is undefined in fetchTrades");
@@ -129,9 +129,12 @@ export default function Home() {
     // Initial fetch
     fetchAndSetBlocks().then(() => {
       if (currentBlock !== null) {
+        if (lastBlockFetched === null) {
+          return;
+        }
         const fromBlock = lastBlockFetched + BigInt(1);
         const fromBlockHex = web3.utils.toHex(fromBlock);
-        const toBlock = web3.utils.toHex(currentBlock);
+        const toBlock = web3.utils.toHex(currentBlock - BigInt(1));
 
         fetchTrades(contract, fromBlockHex, toBlock).then((newEvents) => {
           setEvents((prevEvents) => [...newEvents,...prevEvents]);
