@@ -5,21 +5,30 @@ import { useState, useEffect } from "react";
 import { type } from "os";
 import Web3 from "web3";
 import { contractAbi } from "@/constants/contractABI";
-import { Trade } from "@/types/index";
-import { fetchTrades, fetchRoomCreations } from "@/utils/fetch";
+import { Trade, Trader } from "@/types/index";
+import {
+  fetchTrades,
+  fetchRoomCreations,
+  fetchTraderInfo,
+} from "@/utils/fetch";
 import { providerUrl } from "@/constants/provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
-const toBase64 = (str:string) => {
+const toBase64 = (str: string) => {
   // Encode the string to Base64
   return btoa(str);
 };
+
 export default function Home() {
   const [events, setEvents] = useState<Trade[]>([]);
 
+  const [traders, setTraders] = useState<Record<string, Trader>>({});
+
   const [currentBlock, setCurrentBlock] = useState<bigint | null>(null);
   const [lastBlockFetched, setLastBlockFetched] = useState<bigint | null>(null);
+
+  const ZAPPER_API_KEY = process.env.NEXT_PUBLIC_ZAPPER_API_KEY || "";
 
   useEffect(() => {
     const web3 = new Web3(providerUrl);
@@ -29,7 +38,7 @@ export default function Home() {
     const fetchAndSetBlocks = async () => {
       const latestBlock = await web3.eth.getBlockNumber();
       if (lastBlockFetched === null) {
-        setLastBlockFetched(latestBlock - BigInt(50));
+        setLastBlockFetched(latestBlock - BigInt(20));
       } else {
         setLastBlockFetched(currentBlock);
       }
@@ -56,10 +65,35 @@ export default function Home() {
         console.log(`currentBlock: ${currentBlock}`);
         fetchTrades(contract, fromBlockHex, toBlock).then((newEvents) => {
           setEvents((prevEvents) => [...newEvents, ...prevEvents]);
+          for (let i = 0; i < newEvents.length; i++) {
+            const buyer = newEvents[i].buyer;
+            // if the trader is not in the traders object, add them
+            if (!traders[buyer]) {
+              fetchTraderInfo(buyer, ZAPPER_API_KEY).then((trader) => {
+                setTraders((prevTraders) => ({
+                  ...prevTraders,
+                  [buyer]: trader,
+                }));
+              });
+            }
+          }
         });
         fetchRoomCreations(contract, fromBlockHex, toBlock).then(
           (newEvents) => {
             setEvents((prevEvents) => [...newEvents, ...prevEvents]);
+            // loop through each new event and print the buyer address
+            for (let i = 0; i < newEvents.length; i++) {
+              const buyer = newEvents[i].buyer;
+              // if the trader is not in the traders object, add them
+              if (!traders[buyer]) {
+                fetchTraderInfo(buyer, ZAPPER_API_KEY).then((trader) => {
+                  setTraders((prevTraders) => ({
+                    ...prevTraders,
+                    [buyer]: trader,
+                  }));
+                });
+              }
+            }
           }
         );
       }
@@ -90,6 +124,12 @@ export default function Home() {
               className="py-3.5 px-4 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
             >
               Trader
+            </th>
+            <th
+              scope="col"
+              className="py-3.5 px-4 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
+            >
+              Trader Chain-Chat $
             </th>
             <th
               scope="col"
@@ -145,6 +185,9 @@ export default function Home() {
                 >
                   {event.buyer.slice(0, 10)}
                 </a>
+              </td>
+              <td className="px-4 py-4 text-sm font-medium whitespace-nowrap">
+                {traders[event.buyer]?.chainChatValue?.split('.')[0] ?? 0}
               </td>
               <td className="px-4 py-4 text-sm font-medium whitespace-nowrap">
                 {/* Encode channelId to Base64 */}
