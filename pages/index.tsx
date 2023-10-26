@@ -24,7 +24,7 @@ export default function Home() {
         />
       </div>
       <div className='bg-gray-900 m-20 rounded-xl'>
-        <Link href="/table/events"><h1 className="text-4xl p-4">Connect</h1></Link>
+        <Link href="/table/events"><h1 className="text-4xl p-4">Enter</h1></Link>
       </div>
     </main>
   );
