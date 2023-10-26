@@ -66,30 +66,35 @@ const fetchTrades = async (
   }
   const newEvents = await Promise.all(
     rawEvents.map(async (event: any) => {
-      const { returnValues, blockNumber, transactionHash } = event;
-    
-      const blockDetails = await web3.eth.getBlock(blockNumber);
-      if (blockDetails === undefined || !blockDetails.timestamp) {
-        console.warn("blockDetails is undefined in fetchTrades");
-        return;
+      try {
+        const { returnValues, blockNumber, transactionHash } = event;
+        const blockDetails = await web3.eth.getBlock(blockNumber);
+
+        if (!blockDetails || !blockDetails.timestamp) {
+          console.warn("blockDetails or timestamp is missing");
+          return null; // Returning null here, to filter out later
+        }
+        const timestamp = new Date(
+          Number(blockDetails.timestamp) * 1000
+        ).toLocaleTimeString();
+
+        let ethAmountString = returnValues.ethAmount.toString(); // Convert BigInt to string
+        let ethAmountNumber = parseFloat(ethAmountString); // Convert to Number for further calculations
+        let ethAbs = Math.abs(parseFloat((ethAmountNumber / 1e18).toFixed(7)));
+
+        return {
+          buyer: returnValues.trader,
+          channelId: returnValues.channelId.toString(),
+          transactionType: returnValues.isBuy ? "Buy" : "Sell",
+          shareQuantity: returnValues.shareAmount.toString(),
+          ethAmount: ethAbs.toString(),
+          timestamp,
+          transactionHash,
+        };
+      } catch (error) {
+        console.error("Error in Promise.all map:", error);
+        return null; // Return null in case of errors
       }
-      const timestamp = new Date(
-        Number(blockDetails.timestamp) * 1000
-      ).toLocaleTimeString();
-
-      let ethAmountString = returnValues.ethAmount.toString(); // Convert BigInt to string
-      let ethAmountNumber = parseFloat(ethAmountString); // Convert to Number for further calculations
-      let ethAbs = Math.abs(parseFloat((ethAmountNumber / 1e18).toFixed(7)));
-
-      return {
-        buyer: returnValues.trader,
-        channelId: returnValues.channelId.toString(),
-        transactionType: returnValues.isBuy ? "Buy" : "Sell",
-        shareQuantity: returnValues.shareAmount.toString(),
-        ethAmount: ethAbs.toString(),
-        timestamp,
-        transactionHash,
-      };
     })
   );
   const newTradeEvents: Event[] = newEvents.filter(
@@ -134,10 +139,11 @@ export default function Home() {
         }
         const fromBlock = lastBlockFetched + BigInt(1);
         const fromBlockHex = web3.utils.toHex(fromBlock);
-        const toBlock = web3.utils.toHex(currentBlock - BigInt(1));
-
+        const toBlock = web3.utils.toHex(currentBlock);
+        console.log(`fromBLock: ${fromBlock}`)
+        console.log(`currentBlock: ${currentBlock}`)
         fetchTrades(contract, fromBlockHex, toBlock).then((newEvents) => {
-          setEvents((prevEvents) => [...newEvents,...prevEvents]);
+          setEvents((prevEvents) => [...newEvents, ...prevEvents]);
         });
       }
     });
