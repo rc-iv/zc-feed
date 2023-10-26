@@ -131,7 +131,7 @@ export default function Home() {
                   href={`https://basescan.org/tx/${event.transactionHash}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-blue-900 rounded-xl p-1"
+                  className="bg-blue-900 text-center rounded-xl w-24 h-8 flex items-center justify-center"
                 >
                   {event.timestamp}
                 </a>
@@ -141,7 +141,7 @@ export default function Home() {
                   href={`https://zapper.xyz/account/${event.buyer}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-blue-900 rounded-xl p-1"
+                  className="bg-blue-900 text-center rounded-xl w-24 h-8 flex items-center justify-center"
                 >
                   {event.buyer.slice(0, 10)}
                 </a>
@@ -156,7 +156,7 @@ export default function Home() {
                       href={`https://zapper.xyz/chat?channelId=${encodedChannelId}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="bg-blue-900 rounded-xl p-1"
+                      className="bg-blue-900 text-center rounded-xl w-24 h-8 flex items-center justify-center"
                     >
                       {event.channelId}
                     </a>
