@@ -33,7 +33,7 @@ export default function Home() {
     };
 
     // Moved fetchTrades call inside setInterval
-    const pollInterval = 10000;
+    const pollInterval = 1000;
     const poll = setInterval(() => {
       // Fetch the blocks
       fetchAndSetBlocks();
@@ -67,75 +67,93 @@ export default function Home() {
   }, [currentBlock]);
 
   return (
-    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-      {/* Table Header */}
-      <thead className="bg-gray-50 dark:bg-gray-800">
-        <tr>
-          <th
-            scope="col"
-            className="py-3.5 px-4 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
-          >
-            Timestamp
-          </th>
-          <th
-            scope="col"
-            className="py-3.5 px-4 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
-          >
-            Trader
-          </th>
-          <th
-            scope="col"
-            className="py-3.5 px-4 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
-          >
-            Channel ID
-          </th>
-          <th
-            scope="col"
-            className="py-3.5 px-4 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
-          >
-            Cost
-          </th>
-          <th
-            scope="col"
-            className="py-3.5 px-4 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
-          >
-            Quantity
-          </th>
-        </tr>
-      </thead>
-      <tbody className="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900">
-        {events.map((event, index) => (
-          <tr
-            key={index}
-            // Dynamically set class based on transactionType
-            className={
-              event.transactionType === "Buy"
-                ? "bg-green-500"
-                : event.transactionType === "Sell"
-                ? "bg-red-500"
-                : event.transactionType === "channelCreation"
-                ? "bg-blue-500"
-                : "bg-gray-200" // Default
-            }
-          >
-            <td className="px-4 py-4 text-sm font-medium whitespace-nowrap">
-              {event.timestamp}
-            </td>
-            <td className="px-4 py-4 text-sm font-medium whitespace-nowrap">
-              {event.buyer}
-            </td>
-            <td className="px-4 py-4 text-sm font-medium whitespace-nowrap">
-              {event.channelId}
-            </td>
-            <td className="px-4 py-4 text-sm font-medium whitespace-nowrap">
-              {event.ethAmount}
-            </td>
-            <td className="px-4 py-4 text-sm font-medium whitespace-nowrap">
-              {event.shareQuantity}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <div className="flex justify-between">
+      {/* <div className="">
+        <p>Test</p>
+      </div> */}
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          {/* Table Header */}
+          <thead className="bg-gray-50 dark:bg-gray-800">
+            <tr>
+              <th
+                scope="col"
+                className="py-3.5 px-4 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
+              >
+                Timestamp
+              </th>
+              <th
+                scope="col"
+                className="py-3.5 px-4 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
+              >
+                Trader
+              </th>
+              <th
+                scope="col"
+                className="py-3.5 px-4 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
+              >
+                Channel ID
+              </th>
+              <th
+                scope="col"
+                className="py-3.5 px-4 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
+              >
+                Cost
+              </th>
+              <th
+                scope="col"
+                className="py-3.5 px-4 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
+              >
+                Quantity
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900">
+            {events.map((event, index) => (
+              <tr
+                key={index}
+                // Dynamically set class based on transactionType
+                className={
+                  event.transactionType === "Buy"
+                    ? "bg-green-500"
+                    : event.transactionType === "Sell"
+                    ? "bg-red-500"
+                    : event.transactionType === "channelCreation"
+                    ? "bg-blue-500"
+                    : "bg-gray-200" // Default
+                }
+              >
+                <td className="px-4 py-4 text-sm font-medium whitespace-nowrap">
+                  <a
+                  href={`https://basescan.org/tx/${event.transactionHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-blue-900 rounded-xl p-1">
+                  {event.timestamp}
+                  </a>
+                </td>
+                <td className="px-4 py-4 text-sm font-medium whitespace-nowrap">
+                  <a
+                    href={`https://zapper.xyz/account/${event.buyer}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-blue-900 rounded-xl p-1"
+                  >
+                    {event.buyer.slice(0, 10)}
+                  </a>
+                </td>
+                <td className="px-4 py-4 text-sm font-medium whitespace-nowrap">
+                  {event.channelId}
+                </td>
+                <td className="px-4 py-4 text-sm font-medium whitespace-nowrap">
+                  {event.ethAmount}
+                </td>
+                <td className="px-4 py-4 text-sm font-medium whitespace-nowrap">
+                  {event.shareQuantity}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
   );
 }
